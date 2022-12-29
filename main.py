@@ -29,7 +29,6 @@ class Cafe(db.Model):
         # for column in self.__table__.columns:
         #     dictionary[column.name] = getattr(self, column.name)
         # return dictionary
-
         return {column.name: getattr(self,column.name) for column in self.__table__.columns}
 
 @app.route("/")
@@ -59,8 +58,18 @@ def get_random_cafe():
     return jsonify(cafe=random_cafe.to_dict())
 
 ## HTTP GET - Read Record
+# Returns all cafes in database
+@app.route("/all", methods=["GET"])
+def get_all_cafes():
+    cafes = db.session.query(Cafe).all()
+    all_cafes_dict = []
+    for cafe in cafes:
+        all_cafes_dict.append(cafe.to_dict())
+    return jsonify(cafes=all_cafes_dict)
+
 
 ## HTTP POST - Create Record
+
 
 ## HTTP PUT/PATCH - Update Record
 
