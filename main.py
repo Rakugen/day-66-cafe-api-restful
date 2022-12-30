@@ -24,6 +24,7 @@ class Cafe(db.Model):
     can_take_calls = db.Column(db.Boolean, nullable=False)
     coffee_price = db.Column(db.String(250), nullable=True)
 
+    # Helper function that changes all attributes in a cafe object into a dict
     def to_dict(self):
         # dictionary = {}
         # for column in self.__table__.columns:
@@ -40,21 +41,6 @@ def get_random_cafe():
     cafes = db.session.query(Cafe).all()
     random_cafe = random.choice(cafes)
 
-    # Use jsonify() to turn SQLAlchemy object into a JSON via serialization:
-    # new_json = jsonify(cafe={
-    #     'can_take_calls': random_cafe.can_take_calls,
-    #     'coffee_price': random_cafe.coffee_price,
-    #     'has_sockets': random_cafe.has_sockets,
-    #     'has_toilet': random_cafe.has_toilet,
-    #     'has_wifi': random_cafe.has_wifi,
-    #     # 'id': random_cafe.id,
-    #     'img_url': random_cafe.img_url,
-    #     'location': random_cafe.location,
-    #     'map_url': random_cafe.map_url,
-    #     'name': random_cafe.name,
-    #     'seats': random_cafe.seats
-    #     }
-    # )
     return jsonify(cafe=random_cafe.to_dict())
 
 ## HTTP GET - Read Record
@@ -100,7 +86,19 @@ def add_cafe():
 
 ## HTTP PUT/PATCH - Update Record
 
+@app.route('/update-price/<cafe_id>', methods=["PATCH"])
+def update_price(cafe_id):
+    new_price = request.args.get('new_price')
+    cafe = db.session.query(Cafe).get(cafe_id)
+    if cafe:
+        cafe.coffee_price = new_price
+        db.session.commit()
+        return jsonify(response={"success": "Successfully updated coffee price."}), 200
+    else:
+        return jsonify(error={"Not found": "Sorry, that cafe id was not found."}), 404
+
 ## HTTP DELETE - Delete Record
+
 
 
 if __name__ == '__main__':
