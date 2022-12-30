@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 import random
 
 app = Flask(__name__)
+API_KEY = "TestingAPIKey"
 
 ##Connect to Database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cafes.db'
@@ -85,7 +86,7 @@ def add_cafe():
     return jsonify(response={"success": "Successfully added new cafe."})
 
 ## HTTP PUT/PATCH - Update Record
-
+# Updates a cafe with cafe_id with new coffee_price
 @app.route('/update-price/<cafe_id>', methods=["PATCH"])
 def update_price(cafe_id):
     new_price = request.args.get('new_price')
@@ -99,6 +100,20 @@ def update_price(cafe_id):
 
 ## HTTP DELETE - Delete Record
 
+@app.route('/report-closed/<cafe_id>', methods=["DELETE"])
+def delete_cafe(cafe_id):
+    cafe = db.session.query(Cafe).get(cafe_id)
+    api_key = request.args.get('api-key')
+    if api_key == API_KEY:
+        if cafe:
+            # Delete entry in DB
+            db.session.delete(cafe)
+            db.session.commit()
+            return jsonify(response={"success": "Cafe successfully deleted."}), 200
+        else:
+            return jsonify(error={"Not Found": "Unable to find cafe with that id."}), 404
+    else:
+        return jsonify(error={"error": "Sorry, you do not have a valid API Key."}), 403
 
 
 if __name__ == '__main__':
